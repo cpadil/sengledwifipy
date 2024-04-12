@@ -1,0 +1,81 @@
+#  SPDX-License-Identifier: Apache-2.0
+
+[tool.poetry]
+name = "SengledWifiPy"
+version = "0.0.1"
+description = "Python API to control Sengled Wifi Devices Programmatically."
+authors = [
+  "Cesar P <cpo.ca.int@gmail.com>"
+]
+license = "Apache-2.0"
+readme = 'README.md'
+repository = "https://gitlab.com/cpadil/SengledWifiPy"
+keywords = ['Sengled', 'Wifi', 'homeassistant']
+include = ["LICENSE"]
+
+
+[tool.poetry.dependencies]
+python = ">=3.11, <4"
+aiofiles = "^23.2.1"
+simplejson = "*"
+yarl = "*"
+certifi = "*"
+backoff = ">=2.2.1"
+aiohttp = "^3.9.4"
+paho-mqtt = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+aresponses = "*"
+detox = "*"
+mypy = "*"
+pylint = "*"
+pytest-aiohttp = "*"
+pytest-cov = "*"
+python-semantic-release = "7.28.1"
+tox = "*"
+safety = ">=1.8.7"
+Sphinx = ">=3.5.0,<7.0.0"
+autoapi = ">=2.0.1"
+sphinx-rtd-theme = "^0.5.1"
+m2r2 = ">=0.2.7"
+tomlkit = ">=0.7.0"
+sphinx-autoapi = ">=1.7.0"
+sphinx-copybutton = ">=0.3.1"
+pipdeptree = "^2.2.1"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+line-length = 88
+indent-width = 4
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

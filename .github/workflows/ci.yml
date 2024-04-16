@@ -1,0 +1,87 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DEFAULT_PYTHON: 3.11
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    concurrency: release
+    steps:
+    - uses: actions/checkout@main
+    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+      uses: actions/setup-python@v5.1.0
+      with:
+        python-version: ${{ env.DEFAULT_PYTHON }}
+        cache: "poetry"
+    - name: Work dependencies with poetry
+      run: |
+        poetry install --with dev
+    - name: Check security
+      run: |
+        make check_vulns
+
+  build:
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+    - uses: actions/checkout@main
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN_DEPLOY }}
+    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+      uses: actions/setup-python@v5.1.0
+      with:
+        python-version: ${{ env.DEFAULT_PYTHON }}
+        cache: "poetry"
+    - name: Work dependencies with poetry
+      run: |
+        poetry install --with dev
+    - name: Python Semantic Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN_DEPLOY }}
+      run: |
+        semantic_release -v --commit --push --changelog --vcs-release
+    - name: PyPI Publish
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        poetry publish --build
+    - name: Sphinx docs generation
+      run: |
+         make docs
+    - name: Fix permissions
+      run: |
+        chmod -c -R +rX "_site/" | while read line; do
+          echo "::warning title=Invalid file permissions automatically fixed::$line"
+        done
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'docs/build/html'
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

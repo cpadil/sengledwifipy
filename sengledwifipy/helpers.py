@@ -1,10 +1,4 @@
-"""Python Package for controlling Sengled Wifi devices programmatically.
-
-SPDX-License-Identifier: Apache-2.0
-
-For more details about this api, please refer to the documentation at
-https://gitlab.com/cpadil/sengledwifipy
-"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
 
 import functools
 import logging
@@ -14,9 +8,6 @@ from json import JSONDecodeError
 from types import MappingProxyType
 from typing import Optional, Union
 from aiohttp import ClientConnectionError, ContentTypeError, ServerDisconnectedError
-
-#import sengledwifipy.sengledwifilogin
-
 from .const import EXCEPTION_TEMPLATE
 from .errors import (
     SengledWifipyConnectionError,
@@ -62,11 +53,8 @@ def hide_serial(item: Optional[Union[dict, str, list]]) -> Union[dict, str, list
             ):
                 response[key] = hide_serial(value)
     elif isinstance(item, str):
-        response = (
-            f"{item[0]}{'*' * (len(item) - 4)}{item[-3:]}"
-            if len(item) > 6
-            else f"{'*' * len(item)}"
-        )
+        response = f"{item[0]}{'*' * (len(item) - 4)}{item[-3:]}" if len(item) > 6 else f"{'*' * len(item)}"
+
     elif isinstance(item, list):
         response = []
         for list_item in item:
@@ -120,11 +108,11 @@ def obfuscate(item):
             response = tuple(response)
     else:
         return item
+
     return response
 
 
 def catch_all_exceptions(func):
-
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         # login: Optional["sengledwifipy.sengledwifilogin.SengledLogin"] = None
@@ -194,11 +182,14 @@ def catch_all_exceptions(func):
 
     return wrapper
 
+
 def valid_login_required(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         print(args)
-        login = getattr(args[0],"_login", None) if hasattr(args[0],"_login") else [arg for arg in args if hasattr(arg,'_urls') ][0]
+        login = (
+            getattr(args[0], "_login", None) if hasattr(args[0], "_login") else [arg for arg in args if hasattr(arg, "_urls")][0]
+        )
 
         if not await login.valid_login():
             await login.login(SkipTest=True)

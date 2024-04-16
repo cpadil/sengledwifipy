@@ -1,10 +1,4 @@
-"""Python Package for controlling Sengled Wifi devices programmatically.
-
-SPDX-License-Identifier: Apache-2.0
-
-For more details about this api, please refer to the documentation at
-https://gitlab.com/cpadil/sengledwifipy
-"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
 
 
 class SengledWifipyError(Exception):

@@ -1,0 +1,35 @@
+name: On pull request
+
+on: 
+  pull_request:
+    branches:
+      - main
+
+env:
+  DEFAULT_PYTHON: 3.11
+
+jobs:
+
+  python_checks:
+    runs-on: ubuntu-latest
+    name: Python Checks
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: Install requirements
+        run: |
+          python3 -m pip install --user pipx
+          python3 -m pipx ensurepath
+          pipx install poetry
+          poetry install --with dev
+      - name: Check formatting
+        run: |
+          ruff format --check --diff 
+      - name: Check lint
+        run: |
+          ruff check frigate 
+

@@ -52,6 +52,7 @@ coverage.xml
 temp/
 .storage/
 main.py
+.ruff_cache/
 
 # Translations
 *.mo

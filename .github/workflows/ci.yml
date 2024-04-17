@@ -54,11 +54,13 @@ jobs:
       run: |
         poetry install --with dev
     - name: Python Semantic Release
+      id: releasestep
       env:
         GH_TOKEN: ${{ secrets.ALT_TOKEN }}
       run: |
         poetry run semantic-release -v version --commit --push --changelog --vcs-release --skip-build
     - name: PyPI Publish
+      if: steps.releasestep.outputs.released
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
       run: |

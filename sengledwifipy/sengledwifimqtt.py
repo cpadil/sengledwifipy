@@ -20,20 +20,21 @@ class SengledWifiMQTT:
     """Connect to Sengled MQTT broker, subscribe to topics and publish updates. Uses paho-mqtt package.
 
     Attributes:
-        _login: SengledLogin object
-        _session: SengledLogin session attribute
-        _jsession_id: value of cookie JSESSIONID saved in SengledLogin session
-        _headers: same headers used in Android app
-        _clientid: used during the creation of the mqtt client f"{_jsession_id}@lifeApp"
-        mqtt_server: url is obtained during the login and fetched from SengledLogin object
-        mqtt_client: initialization of paho.mqtt client
-        _status: to indicate if mqtt connection is active
-        devices: list of Sengled devices, used to create the topic strings and subscribe, during the initialization is set to None
-        open_callback: an async function to call within the on_connect callback
-        msg_callback: an async function to call within the on_message callback
-        close_callback: an async function to call within the on_disconnect callback
-        error_callback: an async function to call within the on_error callback
-        _loop: asyncio.AbstractEventLoop
+        _login (SengledLogin): SengledLogin object
+        _session (SengledLogin session): SengledLogin session attribute
+        _jsession_id (SengledLogin session JSESSIONID): value of cookie JSESSIONID saved in SengledLogin session
+        _headers (dict[str, str]): same headers used in Android app
+        _clientid (str): used during the creation of the mqtt client f"{_jsession_id}@lifeApp"
+        mqtt_server (URL): url is obtained during the login and fetched from SengledLogin object
+        mqtt_client (paho.mqtt.client): initialization of paho.mqtt client
+        _status (bool): to indicate if mqtt connection is active
+        devices (list[dict[str, str]]): list of Sengled devices, used to create the topic strings and subscribe, \
+            during the initialization is set to None
+        open_callback (Callable): an async function to call within the on_connect callback
+        msg_callback (Callable): an async function to call within the on_message callback
+        close_callback (Callable): an async function to call within the on_disconnect callback
+        error_callback (Callable): an async function to call within the on_error callback
+        _loop (asyncio.AbstractEventLoop): used for callbacks
     """
 
     def __init__(

@@ -65,7 +65,7 @@ html_theme_options = {
     "use_download_button" : False,
     "use_fullscreen_button": False,
     "show_toc_level": 1, # secondary toc
-    "toc_title": "In this page:", # secondary toc
+    "toc_title": "On this page:", # secondary toc
     "home_page_in_toc": True,
     "show_navbar_depth": 2,
     "max_navbar_depth": 3,

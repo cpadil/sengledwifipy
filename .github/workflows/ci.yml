@@ -64,6 +64,7 @@ jobs:
       if: ${{steps.releasestep.outputs.released == 'true'}}
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        POETRY_REQUESTS_TIMEOUT: 60
       run: |
         poetry publish --build
     - name: Sphinx docs generation

@@ -56,7 +56,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        poetry run semantic_release -v --commit --push --changelog --vcs-release
+        poetry run semantic-release -v --commit --push --changelog --vcs-release
     - name: PyPI Publish
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}

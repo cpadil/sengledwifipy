@@ -18,6 +18,8 @@ jobs:
     concurrency: release
     steps:
     - uses: actions/checkout@main
+    - name: Install poetry
+      run: pipx install poetry
     - name: Set up Python ${{ env.DEFAULT_PYTHON }}
       uses: actions/setup-python@v5.1.0
       with:
@@ -42,6 +44,8 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN_DEPLOY }}
+    - name: Install poetry
+      run: pipx install poetry
     - name: Set up Python ${{ env.DEFAULT_PYTHON }}
       uses: actions/setup-python@v5.1.0
       with:

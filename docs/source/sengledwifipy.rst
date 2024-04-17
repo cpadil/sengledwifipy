@@ -1,9 +1,11 @@
+:tocdepth: 3
+
 Code
 ================
 .. automodule:: sengledwifipy
 
 Classes
-==============
+-------------
 .. autoclass:: sengledwifipy.SengledLogin
     :members:
     :undoc-members:
@@ -20,19 +22,19 @@ Classes
     :private-members:
 
 Helpers
-==============
+-------------
 .. automodule:: sengledwifipy.helpers
     :members:
     :undoc-members:
 
 Constants
-==============
+-------------
 .. automodule:: sengledwifipy.const
     :members:
     :undoc-members:
 
 Errors
-==============
+-------------
 .. automodule:: sengledwifipy.errors
     :members:
     :undoc-members:

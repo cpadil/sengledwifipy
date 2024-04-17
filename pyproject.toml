@@ -29,7 +29,6 @@ paho-mqtt = "^2.0.0"
 ruff = "^0.3.7"
 
 [tool.poetry.group.dev.dependencies]
-aresponses = "*"
 mypy = "*"
 pytest-aiohttp = "*"
 pytest-cov = "*"
@@ -38,9 +37,8 @@ safety = ">=1.8.7"
 Sphinx = ">=3.5.0,<7.0.0"
 tomlkit = ">=0.7.0"
 sphinx-autoapi = ">=1.7.0"
-sphinx-copybutton = ">=0.3.1"
-sphinx-book-theme = "^1.1.2"
 myst-parser = "^2.0.0"
+furo = "^2024.1.29"
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.

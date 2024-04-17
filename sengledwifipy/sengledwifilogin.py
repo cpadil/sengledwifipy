@@ -133,10 +133,10 @@ class SengledLogin:
         """
 
         _LOGGER.debug(f'SengledWifiApi: LOGIN validation of session \
-                      \nURL {self._urls["validSession"]}  \
-                      \nHeaders {dumps(self._headers)} \
-                      \nlast login: {self.stats["login_timestamp"]} \
-                      \nin hours:{round((datetime.now() - self.stats["login_timestamp"]).total_seconds()/3600)}h ')
+                      \n--URL {self._urls["validSession"]}  \
+                      \n--Headers {dumps(self._headers)} \
+                      \n--last login: {self.stats["login_timestamp"]} \
+                      \n--hours: {round((datetime.now() - self.stats["login_timestamp"]).total_seconds()/3600)}h ')
         if (datetime.now() - self.stats["login_timestamp"]).total_seconds() < 86400 and await os.path.exists(self._cookiefile):
             resp = None
 
@@ -154,9 +154,9 @@ class SengledLogin:
                 resp = await resp.json()
             except (JSONDecodeError, SimpleJSONDecodeError, ContentTypeError) as ex:
                 _LOGGER.debug(f"SengledWifiApi: LOGIN Error during login validation: \
-                              {EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
+                              \n--{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
 
-            if resp and int(resp.get("messageCode") == 200):
+            if resp and int(resp.get("messageCode")) == 200:
                 _LOGGER.debug("SengledWifiApi: LOGIN login validation with cookie successful")
                 self.stats["api_calls"] += 1
                 return True
@@ -181,7 +181,7 @@ class SengledLogin:
             if await self.valid_login():
                 return
 
-        _LOGGER.debug("SengledWifiApi: LOGIN Using credentials to log in")
+        _LOGGER.debug("SengledWifiApi: LOGIN Using credentials to login")
 
         post_resp = await self._session.post(
             self._urls["login"],
@@ -210,15 +210,15 @@ class SengledLogin:
 
         _LOGGER.debug(f'SengledWifiApi: LOGIN Saving cookie to {self._cookiefile.split("/")[0]}')
         try:
-            if await os.path.exists(self._cookiefile):
-                await self.delete_cookie(self._cookiefile)
+            await self.delete_cookie()
             cookie_jar.save(self._cookiefile)
         except (OSError, EOFError, TypeError, AttributeError) as ex:
-            _LOGGER.debug(f'Error saving pickled cookie to {self._cookiefile.split("/")[0]} .... \
-                          \n{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}')
+            _LOGGER.debug(f'SengledWifiApi: LOGIN Error saving pickled cookie to {self._cookiefile.split("/")[0]} .... \
+                          \n--{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}')
             raise SengledWifipyLoginError
 
-        _LOGGER.debug("SengledWifiApi: LOGIN Saved session Cookies:\n%s", self._print_session_cookies())
+        _LOGGER.debug(f"SengledWifiApi: LOGIN Saved session Cookies: \
+                      \n--{self._print_session_cookies()}")
 
     def _print_session_cookies(self) -> str:
         """Prints the value of the cookies in aiohttp session"""
@@ -245,7 +245,7 @@ class SengledLogin:
             post_resp = await post_resp.json()
         except (JSONDecodeError, SimpleJSONDecodeError, ContentTypeError) as ex:
             _LOGGER.debug(f"SengledWifiApi: LOGIN Error during getServerDetails: \
-                          \n {EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
+                          \n--{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
 
         if int(post_resp.get("messageCode")) == 200:
             self._urls.update(
@@ -273,24 +273,18 @@ class SengledLogin:
         await self.close()
         self._session = None
         self.status = {}
-        if await os.path.exists(self._cookiefile):
-            await self.delete_cookie(self._cookiefile)
+        await self.delete_cookie()
         self._create_session()
 
-    async def delete_cookie(self, cookiefile: str) -> None:
-        """Delete a cookie.
+    async def delete_cookie(self) -> None:
+        """Deletes the session cookie."""
+        _LOGGER.debug(f'SengledWifiApi: LOGIN Deleting cookiefile {self._cookiefile.split("/")[0]} ')
 
-        Args:
-            cookiefile (str): Path to cookie
-        Returns:
-            None
-        """
-        _LOGGER.debug(f'SengledWifiApi: LOGIN Deleting cookiefile {cookiefile.split("/")[0]} ')
-        try:
+        if await os.path.exists(self._cookiefile):
             try:
-                await os.remove(cookiefile)
-            except AttributeError:
-                os.remove(cookiefile)
-        except (OSError, EOFError, TypeError, AttributeError) as ex:
-            _LOGGER.debug(f"SengledWifiApi: LOGIN Error deleting cookie: \
-                          \n{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}; please manually remove")
+                await os.remove(self._cookiefile)
+                _LOGGER.debug("SengledWifiApi: LOGIN Deleting cookiefile successful")
+                return
+            except (OSError, EOFError, TypeError, AttributeError) as ex:
+                _LOGGER.debug(f"SengledWifiApi: LOGIN Error deleting cookie: \
+                              \n{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}; please manually remove")

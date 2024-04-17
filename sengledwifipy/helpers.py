@@ -186,7 +186,7 @@ def catch_all_exceptions(func):
 def valid_login_required(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
-        print(args)
+
         login = (
             getattr(args[0], "_login", None) if hasattr(args[0], "_login") else [arg for arg in args if hasattr(arg, "_urls")][0]
         )

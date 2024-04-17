@@ -79,8 +79,8 @@ class SengledWifiAPI:
         )
 
         _LOGGER.debug(f"SengledWifiApi: API {hide_email(login.email)}: \
-                      \nstatic {response.request_info.method}: {response.request_info.url} \
-                      \nreturned {response.status}:{response.reason}:{response.content_type}")
+                      \n--static {response.request_info.method}: {response.request_info.url} \
+                      \n--returned {response.status}:{response.reason}:{response.content_type}")
 
         login.stats["api_calls"] += 1
         if response.status == 401:
@@ -106,7 +106,7 @@ class SengledWifiAPI:
         Returns:
             Json. Device information.
         """
-        _LOGGER.debug(f"SengledWifiApi: API  get_devices args {login}")
+
         response = await SengledWifiAPI._static_request("post", login, "device/list.json", query=None, data={})
 
         SengledWifiAPI.devices[login.email] = (
@@ -119,7 +119,7 @@ class SengledWifiAPI:
             else SengledWifiAPI.devices
         )
 
-        _LOGGER.debug(f"SengledWifiApi: API  get_devices returned {SengledWifiAPI.devices[login.email]}")
+        _LOGGER.debug(f"SengledWifiApi: API get_devices returned {SengledWifiAPI.devices[login.email]}")
 
         return SengledWifiAPI.devices[login.email]
 
@@ -186,5 +186,5 @@ class SengledWifiAPI:
             json.dumps(data),
         ):
             _LOGGER.debug("SengledWifiApi: API update device state successful")
-            return
+            return True
         _LOGGER.debug("SengledWifiApi: API update device state error")

@@ -1,4 +1,4 @@
-Package Details
+Code
 ================
 .. automodule:: sengledwifipy
 

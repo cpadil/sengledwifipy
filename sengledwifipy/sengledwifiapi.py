@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 class SengledWifiAPI:
     """Uses SengledWifiMqtt and SengledLogin to get information of the devices and set their state.
 
-    Args:
+    Attributes:
         login (SengledLogin):  SengledLogin object
         session (aiohttp ClientSession): Session attribute of login
     """
@@ -57,13 +57,15 @@ class SengledWifiAPI:
         data: Optional[dict[str, str]] = None,
         query: Optional[dict[str, str]] = None,
     ) -> ClientResponse:
-        """Call an API
+        """Call an API.
+
         Args:
-            login: SengledLogin,
-            uri: str,
-            data: Optional[dict[str, str]] = None,
-            query: Optional[dict[str, str]] = None,
-        Returns
+            login (SengledLogin): needs a valid login
+            uri (str): will use the appserver endpoint with this uri
+            data (Optional[dict[str, str]]): payload
+            query (Optional[dict[str, str]]): query parameters
+
+        Returns:
             None or aiohttp ClientResponse
         """
         session = login.session
@@ -101,7 +103,7 @@ class SengledWifiAPI:
             entity_ids (List[str]): The list of entities you want information about. \
                 Optional if all devices information is required. (replaces get_entity_state)
 
-        Returns 
+        Returns:
             Json. Device information.
         """
         _LOGGER.debug(f"SengledWifiApi: API  get_devices args {login}")

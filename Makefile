@@ -16,7 +16,7 @@ lint:
 format:
 	poetry run ruff format --check --diff 
 
-docs:
+docu:
 	poetry run sphinx-build -M html docs/source/ docs/build/
 
 setup_env:

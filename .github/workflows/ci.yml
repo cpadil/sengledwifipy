@@ -61,7 +61,7 @@ jobs:
       run: |
         poetry run semantic-release -v version --commit --push --changelog --vcs-release --skip-build
     - name: PyPI Publish
-      if: ${{steps.releasestep.outputs.released == 'true'}}
+      if: steps.releasestep.outputs.released == 'true'
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         POETRY_REQUESTS_TIMEOUT: 60

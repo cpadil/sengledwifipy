@@ -3,7 +3,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python version compatibility](https://img.shields.io/pypi/pyversions/sengledwifipy)](https://pypi.org/project/sengledwifipy)
 [![Version on PyPi](https://img.shields.io/pypi/v/sengledwifipy)](https://pypi.org/project/sengledwifipy)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/sengledwifipy)
 
 
 Python package for controlling Sengled Wifi devices. 

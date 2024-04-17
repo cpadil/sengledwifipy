@@ -69,16 +69,16 @@ jobs:
         poetry publish --build
     - name: Sphinx docs generation
       run: |
-         make docs
+        poetry run sphinx-build -M html docs/source/ docs/build/
     - name: Fix permissions
       run: |
-        chmod -c -R +rX "_site/" | while read line; do
+        chmod -c -R +rX "docs/build/" | while read line; do
           echo "::warning title=Invalid file permissions automatically fixed::$line"
         done
     - name: Upload Artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: 'docs/build/html'
+        path: 'docs/build/html/'
   
   deploy:
     needs: build

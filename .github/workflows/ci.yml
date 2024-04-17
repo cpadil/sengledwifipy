@@ -57,10 +57,11 @@ jobs:
       id: releasestep
       env:
         GH_TOKEN: ${{ secrets.ALT_TOKEN }}
+        GITHUB_OUTPUT: ${{ env.GITHUB_OUTPUT }}
       run: |
         poetry run semantic-release -v version --commit --push --changelog --vcs-release --skip-build
     - name: PyPI Publish
-      if: steps.releasestep.outputs.released
+      if: ${{steps.releasestep.outputs.released == 'true'}}
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
       run: |

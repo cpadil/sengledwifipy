@@ -42,6 +42,7 @@ jobs:
     - uses: actions/checkout@main
       with:
         fetch-depth: 0
+        token: ${{ secrets.ALT_TOKEN }}
     - name: Install poetry
       run: pipx install poetry
     - name: Set up Python ${{ env.DEFAULT_PYTHON }}
@@ -54,7 +55,7 @@ jobs:
         poetry install --with dev
     - name: Python Semantic Release
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.ALT_TOKEN }}
       run: |
         poetry run semantic-release -v version --commit --push --changelog --vcs-release
     - name: PyPI Publish

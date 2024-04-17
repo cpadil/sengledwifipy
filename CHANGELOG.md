@@ -1,0 +1,34 @@
+# CHANGELOG
+
+
+
+## v0.0.2 (2024-04-17)
+
+### Fix
+
+* fix: github actions (#12) ([`d43bac9`](https://github.com/cpadil/sengledwifipy/commit/d43bac9f5215e1701d756f09b877dee986ac03fa))
+
+### Unknown
+
+* another fix for github actions (#11) ([`3281ce6`](https://github.com/cpadil/sengledwifipy/commit/3281ce675f123a5723c5fc39c7158ffb845ef105))
+
+* fix github actions (#10) ([`8d1c393`](https://github.com/cpadil/sengledwifipy/commit/8d1c3939ac24f836a3c8d06ed6ab2435a6104ceb))
+
+* fix ci github actions (#9) ([`4904a11`](https://github.com/cpadil/sengledwifipy/commit/4904a11d413e8fa9b9fc354721fdbaef92ea724a))
+
+
+## v0.0.1 (2024-04-17)
+
+### Unknown
+
+* fix ci github action (#8) ([`8edba03`](https://github.com/cpadil/sengledwifipy/commit/8edba039402cd8ea981fc7eeb411bd149c7a0e9f))
+
+* fix ci github action (#7) ([`8fcd77c`](https://github.com/cpadil/sengledwifipy/commit/8fcd77cb140985cb9f724b3dca7720d8e2126a9b))
+
+* fix ci github action (#6) ([`0fbc996`](https://github.com/cpadil/sengledwifipy/commit/0fbc99659b597f4b55c0fa22ed2a070e4ec7c4c4))
+
+* fix github actions (#5) ([`fb3ceef`](https://github.com/cpadil/sengledwifipy/commit/fb3ceef9d6a2d6f0d008d8823aa03dbd4f17e6c0))
+
+* more documentation (#3) ([`945d13e`](https://github.com/cpadil/sengledwifipy/commit/945d13e1368976e67ddee87019fcb450a592823d))
+
+* initial commit ([`289cf4e`](https://github.com/cpadil/sengledwifipy/commit/289cf4e37320d84c4da2bbd36faa8edbfe9917d9))

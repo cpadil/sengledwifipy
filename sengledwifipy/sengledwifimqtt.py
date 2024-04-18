@@ -3,11 +3,13 @@
 from __future__ import annotations
 import logging
 import json
+
 import asyncio
 from yarl import URL
 from typing import Callable, Any, Optional, Iterable, TYPE_CHECKING
 from collections.abc import Coroutine
 from paho.mqtt import client as mqtt, enums as mqttenums
+
 from .helpers import valid_login_required
 
 if TYPE_CHECKING:
@@ -77,7 +79,6 @@ class SengledWifiMQTT:
             callback_api_version=mqttenums.CallbackAPIVersion.VERSION2,
             client_id=self._clientid,
             transport="websockets",
-            # not supported yet ,protocol = mqttenums.MQTTProtocolVersion.MQTTv5
         )
         self.mqtt_client.tls_set_context()
         self.mqtt_client.ws_set_options(
@@ -119,7 +120,7 @@ class SengledWifiMQTT:
             userdata: the private user data as set in Client() or user_data_set()
             flags (ConnectFlags): the flags for this connection
             rc (ReasonCode): the connection reason code received from the broken. \
-                In MQTT v5.0 it’s the reason code defined by the standard.
+                In MQTT v5.0 it is the reason code defined by the standard.
             properties (Properties): the MQTT v5.0 properties received from the broker. 
 
         Returns:

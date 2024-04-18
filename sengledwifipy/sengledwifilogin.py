@@ -5,6 +5,9 @@ import os as oos
 from datetime import datetime
 from json import JSONDecodeError, dumps
 from typing import Callable, Optional, Union
+
+import ssl
+import certifi
 from uuid import uuid4
 from aiofiles import os
 from aiohttp import ContentTypeError, ClientSession, CookieJar
@@ -58,8 +61,6 @@ class SengledLogin:
             uuid: (Optional[string]): Unique 32 char hex to serve as app serial number for registration
 
         """
-        import ssl
-        import certifi
 
         self._urls: dict[str, str] = SENGLED_ENDPOINTS
         self._email: str = email

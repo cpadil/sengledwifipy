@@ -5,13 +5,10 @@ import json
 import logging
 import time
 from typing import Any, Optional, TYPE_CHECKING
+
 from aiohttp import ClientConnectionError, ClientResponse
 import backoff
 from yarl import URL
-
-if TYPE_CHECKING:
-    from .sengledwifilogin import SengledLogin
-    from .sengledwifimqtt import SengledWifiMQTT
 
 from .errors import (
     SengledWifipyConnectionError,
@@ -19,6 +16,11 @@ from .errors import (
     SengledWifipyLoginError,
     SengledWifipyTooManyRequestsError,
 )
+
+if TYPE_CHECKING:
+    from .sengledwifilogin import SengledLogin
+    from .sengledwifimqtt import SengledWifiMQTT
+
 
 from .helpers import catch_all_exceptions, hide_email, valid_login_required
 

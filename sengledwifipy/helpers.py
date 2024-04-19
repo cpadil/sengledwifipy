@@ -1,4 +1,4 @@
-"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0."""
 
 import functools
 import logging
@@ -6,8 +6,9 @@ from asyncio import CancelledError
 from http.cookies import CookieError, Morsel
 from json import JSONDecodeError
 from types import MappingProxyType
-from typing import Optional, Union
+
 from aiohttp import ClientConnectionError, ContentTypeError, ServerDisconnectedError
+
 from .const import EXCEPTION_TEMPLATE
 from .errors import (
     SengledWifipyConnectionError,
@@ -31,7 +32,7 @@ def hide_password(value: str) -> str:
     return f"REDACTED {len(value)} CHARS"
 
 
-def hide_serial(item: Optional[Union[dict, str, list]]) -> Union[dict, str, list]:
+def hide_serial(item: dict| str | list) -> dict| str | list:
     """Obfuscate serial."""
     if item is None:
         return ""
@@ -112,14 +113,9 @@ def obfuscate(item):
     return response
 
 
-def catch_all_exceptions(func):
+def catch_all_exceptions(func):  # noqa: D103
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
-        # login: Optional["sengledwifipy.sengledwifilogin.SengledLogin"] = None
-        # for arg in args:
-        #     if isinstance(arg, sengledwifipy.sengledwifilogin.SengledLogin):
-        #         login = arg
-        #         break
         try:
             return await func(*args, **kwargs)
         except (ClientConnectionError, KeyError, ServerDisconnectedError) as ex:
@@ -141,8 +137,6 @@ def catch_all_exceptions(func):
                 obfuscate(kwargs),
                 EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args),
             )
-            # if login:
-            #     login.status["login_successful"] = False
             raise SengledWifipyLoginError from ex
         except ContentTypeError as ex:
             _LOGGER.warning(
@@ -153,8 +147,6 @@ def catch_all_exceptions(func):
                 obfuscate(kwargs),
                 EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args),
             )
-            # if login:
-            #     login.status["login_successful"] = False
             raise SengledWifipyLoginError from ex
         except CancelledError as ex:
             _LOGGER.warning(
@@ -178,15 +170,13 @@ def catch_all_exceptions(func):
                 EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args),
             )
             raise
-            # return None
 
     return wrapper
 
 
-def valid_login_required(func):
+def valid_login_required(func):  # noqa: D103
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
-
         login = (
             getattr(args[0], "_login", None) if hasattr(args[0], "_login") else [arg for arg in args if hasattr(arg, "_urls")][0]
         )

@@ -55,6 +55,19 @@ This is a way to update the device state:
 SengledWifiAPI.set_device_state(MqttClient,"deviceId",power_on=True, brightness=100)
 ```
 
+## Contributing
+
+1. [Check for open features/bugs][issues].
+2. [Fork the repository][fork].
+3. (Recommended) Use the latest version of Python supported >= 3.12.
+4. (Recommended) Install [poetry](https://python-poetry.org/docs/#installation) (recommended installation method: [pipx](https://pipx.pypa.io/stable/)):
+    - ```pipx install poetry```
+5. Install the development environment:
+    - ```poetry install --with dev```
+    - ```pre-commit install```
+6. Code your new feature or bug fix on a new branch.
+7. Make sure to update the docstring as required.
+8. Submit a pull request!
 
 ## Credits
 

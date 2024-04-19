@@ -1,4 +1,4 @@
-"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0."""
 
 HA_DOMAIN = "sengledwifi"
 """For Home Assistant integration."""

@@ -30,7 +30,7 @@ jobs:
         poetry install --with dev
     - name: Check security
       run: |
-        make check_vulns
+        poetry run safety check
 
   build:
     needs: test
@@ -79,13 +79,13 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: 'docs/build/html/'
-  
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      pages: write      
-      id-token: write   
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

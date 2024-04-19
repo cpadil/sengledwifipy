@@ -1,14 +1,15 @@
-"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0."""
 
 from __future__ import annotations
-import logging
-import json
 
 import asyncio
+import json
+import logging
+from typing import TYPE_CHECKING, Any, Callable, Coroutine
+
+from paho.mqtt import client as mqtt
+from paho.mqtt import enums as mqttenums
 from yarl import URL
-from typing import Callable, Any, Optional, Iterable, TYPE_CHECKING
-from collections.abc import Coroutine
-from paho.mqtt import client as mqtt, enums as mqttenums
 
 from .helpers import valid_login_required
 
@@ -42,21 +43,21 @@ class SengledWifiMQTT:
     def __init__(
         self,
         login: SengledLogin,
-        msg_callback: Optional[Callable[[], Coroutine[Any, Any, None]]] = None,
-        open_callback: Optional[Callable[[], Coroutine[Any, Any, None]]] = None,
-        close_callback: Optional[Callable[[], Coroutine[Any, Any, None]]] = None,
-        error_callback: Optional[Callable[[], Coroutine[Any, Any, None]]] = None,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
+        msg_callback: Callable[[], Coroutine[Any, Any, None]] = None,
+        open_callback: Callable[[], Coroutine[Any, Any, None]] = None,
+        close_callback: Callable[[], Coroutine[Any, Any, None]] = None,
+        error_callback: Callable[[], Coroutine[Any, Any, None]] = None,
+        loop: asyncio.AbstractEventLoop = None,
     ) -> None:
         """Initialization of SengledWifiMQTT class, requires a valid SengledLogin object.
 
         Args:
             login (SengledLogin): Defines if instance exhibits this preference.
-            msg_callback (Optional[Callable]): callback function when new messages arrive.
-            open_callback (Optional[Callable]): callback function when connection is opened.
-            close_callback (Optional[Callable]): callback function when when the connection is closed.
-            error_callback (Optional[Callable]): callback function when there is an error.
-            loop: (Optional[asyncio.AbstractEventLoop]).
+            msg_callback (Callable): callback function when new messages arrive.
+            open_callback (Callable): callback function when connection is opened.
+            close_callback (Callable): callback function when when the connection is closed.
+            error_callback (Callable): callback function when there is an error.
+            loop: (asyncio.AbstractEventLoop).
         """
         self._login = login
         self._session = login.session
@@ -69,7 +70,7 @@ class SengledWifiMQTT:
         self.mqtt_server = URL(login.urls["mqtt"])
         self.mqtt_client: mqtt.Client = None
         self._status: bool = False
-        self.devices: Iterable = None
+        self.devices: dict = None
         self.open_callback: Callable[[], Coroutine[Any, Any, None]] = open_callback
         self.msg_callback: Callable[[], Coroutine[Any, Any, None]] = msg_callback
         self.close_callback: Callable[[], Coroutine[Any, Any, None]] = close_callback
@@ -92,7 +93,7 @@ class SengledWifiMQTT:
         self.mqtt_client.on_log = self.on_log
 
     @valid_login_required
-    async def async_connect(self, devices: Iterable = None) -> None:
+    async def async_connect(self, devices: dict = None) -> None:
         """Initialize MQTT connection async.
 
         Args:
@@ -112,7 +113,9 @@ class SengledWifiMQTT:
         self.mqtt_client.loop_start()
 
     def on_connect(self, mqttc, userdata, flags, rc, properties) -> None:
-        """Callback. Called when the broker responds to our connection request. Calls the async function open_callback defined. \
+        """Callback. Called when the broker responds to our connection request.
+
+        Calls the async function open_callback defined. \
             Uses devices input argument to subscribe if connection is successful.
 
         Args:
@@ -121,7 +124,7 @@ class SengledWifiMQTT:
             flags (ConnectFlags): the flags for this connection
             rc (ReasonCode): the connection reason code received from the broken. \
                 In MQTT v5.0 it is the reason code defined by the standard.
-            properties (Properties): the MQTT v5.0 properties received from the broker. 
+            properties (Properties): the MQTT v5.0 properties received from the broker.
 
         Returns:
             None
@@ -129,7 +132,13 @@ class SengledWifiMQTT:
         if rc == 0:
             _LOGGER.debug(f"SengledWifiApi: MQTT open connection result: {rc}")
 
-            topics = [("wifielement/" + device["deviceUuid"] + "/status", 2) for device in self.devices]
+            topics = [
+                (
+                    "wifielement/" + device["deviceUuid"] + "/status",
+                    2,
+                )
+                for device in self.devices
+            ]
             self.mqtt_client.subscribe(topics)
             self._status = True
             if self.open_callback:
@@ -138,7 +147,8 @@ class SengledWifiMQTT:
         _LOGGER.debug(f"SengledWifiApi: MQTT open connection error: {rc} ")
 
     def on_message(self, mqttc, userdata, msg) -> None:
-        """Callback. Called when a message has been received from mqtt broker. \
+        """Callback. Called when a message has been received from mqtt broker.
+
             Parses the message and then calls the async function msg_callback defined.
 
         Args:
@@ -168,15 +178,15 @@ class SengledWifiMQTT:
             asyncio.run_coroutine_threadsafe(self.msg_callback(), self._loop)
 
     def on_subscribe(self, mqttc, userdata, mid, rc_list, properties):
-        """Callback. Called when the broker responds to a subscription request. 
+        """Callback. Called when the broker responds to a subscription request.
 
         Args:
             mqttc (Client): the client instance for this callback
             userdata: the private user data as set in Client() or user_data_set()
             mid (int): matches the mid variable returned from the corresponding subscribe() call.
             rc_list (list[ReasonCode]): reason codes received from the broker for each subscription. \
-                In MQTT v5.0 it is the reason code defined by the standard. 
-            properties (Properties): the MQTT v5.0 properties received from the broker. 
+                In MQTT v5.0 it is the reason code defined by the standard.
+            properties (Properties): the MQTT v5.0 properties received from the broker.
 
         Returns:
             None
@@ -184,7 +194,7 @@ class SengledWifiMQTT:
         _LOGGER.debug(f"SengledWifiApi: MQTT subscribe result: {mid}")
 
     def on_log(self, mqttc, userdata, level, buf):
-        """Callback. Called when the client has log information. Only used when the logger is set to debug. 
+        """Callback. Called when the client has log information. Only used when the logger is set to debug.
 
         Args:
             mqttc (Client): the client instance for this callback
@@ -208,7 +218,7 @@ class SengledWifiMQTT:
             flags (ConnectFlags): the flags for this connection
             rc (ReasonCode): the connection reason code received from the broken. \
                 In MQTT v5.0 it’s the reason code defined by the standard.
-            properties (Properties): the MQTT v5.0 properties received from the broker. 
+            properties (Properties): the MQTT v5.0 properties received from the broker.
 
         Returns:
             None
@@ -233,7 +243,6 @@ class SengledWifiMQTT:
         Returns:
             True if publish was successful or False if there was an issue
         """
-
         if not self.mqtt_client.is_connected():
             _LOGGER.debug("SengledWifiApi: MQTT Publish - not connected, trying to connect and publish")
             self.sync_connect()

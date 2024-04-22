@@ -1,8 +1,8 @@
 # SengledWifiPy
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python version compatibility](https://img.shields.io/pypi/pyversions/sengledwifipy)](https://pypi.org/project/sengledwifipy)
-[![Version on PyPi](https://img.shields.io/pypi/v/sengledwifipy)](https://pypi.org/project/sengledwifipy)
+[![License][license-badge]][license]
+[![Python version compatibility][python-badge]][python]
+[![Version on PyPi][pypi-badge]][pypi]
 
 
 Python package for controlling Sengled Wifi devices. 
@@ -16,11 +16,11 @@ Features:
 
 ## Documentation
 
-[Code Documentation](https://cpadil.github.io/sengledwifipy)
+[Code Documentation][documentation]
 
 TL;DR The package is based on 3 classes:
 * `SengledWifiLogin` - Takes care of the login (requires credentials), reduces the API calls to a minimum by saving a session cookie locally.
-* `SengledWifiMqtt` - Requires a login (SengledWifiLogin), creates the connection to the MQTT server, subscribe to topics and publish updates. Is a wrapper for [paho-mqtt](https://pypi.org/project/paho-mqtt/).
+* `SengledWifiMqtt` - Requires a login (SengledWifiLogin), creates the connection to the MQTT server, subscribe to topics and publish updates. Is a wrapper for [paho-mqtt][paho-mqtt-link].
 * `SengledWifiApi` - Uses the other two classes to get/set devices state
 
 
@@ -60,7 +60,7 @@ SengledWifiAPI.set_device_state(MqttClient,"deviceId",power_on=True, brightness=
 1. [Check for open features/bugs][issues].
 2. [Fork the repository][fork].
 3. (Recommended) Use the latest version of Python supported >= 3.12.
-4. (Recommended) Install [poetry](https://python-poetry.org/docs/#installation) (recommended installation method: [pipx](https://pipx.pypa.io/stable/)):
+4. (Recommended) Install [poetry][poetry-link] (recommended installation method: [pipx][pipx-link]):
     - ```pipx install poetry```
 5. Install the development environment:
     - ```poetry install --with dev```
@@ -74,3 +74,16 @@ SengledWifiAPI.set_device_state(MqttClient,"deviceId",power_on=True, brightness=
 Inspired by:
 - [alexapy](https://gitlab.com/keatontaylor/alexapy) (design ideas)
 - [ha-sengledapi](https://github.com/jfarmer08/ha-sengledapi)
+
+[pypi]: https://pypi.org/project/sengledwifipy
+[pypi-badge]: https://img.shields.io/pypi/v/sengledwifipy
+[python]: https://pypi.org/project/sengledwifipy
+[python-badge]: https://img.shields.io/pypi/pyversions/sengledwifipy
+[license]: https://github.com/cpadil/sengledwifipy?tab=Apache-2.0-1-ov-file
+[license-badge]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+[issues]: https://github.com/cpadil/sengledwifipy/issues
+[fork]: https://github.com/cpadil/sengledwifipy/fork
+[documentation]: https://cpadil.github.io/sengledwifipy
+[paho-mqtt-link]: https://pypi.org/project/paho-mqtt/
+[poetry-link]: https://python-poetry.org/docs/#installation
+[pipx-link]: https://pipx.pypa.io/stable/

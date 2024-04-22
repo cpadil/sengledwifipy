@@ -7,30 +7,68 @@ default_language_version:
     python: python3.12
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-toml
-      - id: check-added-large-files
-      - id: check-ast
-      - id: fix-byte-order-marker
-      - id: debug-statements
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.24.0
-    hooks:
-      - id: commitizen
   - repo: local
     hooks:
+      - id: end-of-file-fixer
+        name: Checking empty files
+        language: system
+        types: [python]
+        entry: poetry run end-of-file-fixer
+      - id: check-yaml
+        name: Checking yaml files
+        language: system
+        types: [yaml]
+        entry: poetry run check-yaml
+      - id: check-toml
+        name: Checking toml files
+        language: system
+        types: [toml]
+        entry: poetry run check-toml
+      - id: check-added-large-files
+        name: Checking large files
+        language: system
+        types: [python]
+        entry: poetry run check-added-large-files
+      - id: check-ast
+        name: Checking python files
+        language: system
+        types: [python]
+        entry: poetry run check-ast
+      - id: fix-byte-order-marker
+        name: Checking utf-8 byte order marker
+        language: system
+        types: [python]
+        entry: poetry run fix-byte-order-marker
+      - id: debug-statements
+        name: Checking for debug statements
+        language: system
+        types: [python]
+        entry: poetry run debug-statement-hook
       - id: lint
         name: Run lint with ruff
         language: system
         types: [python]
-        entry: poetry run ruff --fix
-        exclude: ^docs\/conf.py$
+        entry: poetry run ruff check --fix
+        exclude: ^docs[\\\/]source[\\\/]*
+        stages: [pre-commit]
       - id: format
         name: Run lint with ruff
         language: system
         types: [python]
-        entry: poetry run ruff format --fix
+        entry: poetry run ruff format
+        exclude: ^docs[\\\/]source[\\\/]*
+        stages: [pre-commit]
+      - id: commitmsg
+        name: Check commit message
+        entry: poetry run cz check --allow-abort --commit-msg-file
+        stages: [commit-msg]
+        language: system
+      - id: no-commit-to-branch
+        name: Checking for commit to protected branch
+        language: system
+        entry: poetry run no-commit-to-branch
+        pass_filenames: false
+        always_run: true
+        args:
+          - --branch=dev
+          - --branch=main

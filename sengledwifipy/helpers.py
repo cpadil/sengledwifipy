@@ -32,7 +32,7 @@ def hide_password(value: str) -> str:
     return f"REDACTED {len(value)} CHARS"
 
 
-def hide_serial(item: dict| str | list) -> dict| str | list:
+def hide_serial(item: dict | str | list) -> dict | str | list:
     """Obfuscate serial."""
     if item is None:
         return ""

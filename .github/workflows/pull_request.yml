@@ -5,14 +5,15 @@ on:
     types: [opened, reopened, synchronize]
     branches:
       - main
+      - dev
 
 env:
-  DEFAULT_PYTHON: 3.11
+  DEFAULT_PYTHON: 3.12
 
 jobs:
 
   python_checks:
-    if: github.event.pull_request.head.repo.fork
+#    if: github.event.pull_request.head.repo.fork
     runs-on: ubuntu-latest
     name: Python Checks
     steps:
@@ -28,9 +29,9 @@ jobs:
       - name: Work dependencies with poetry
         run: |
           poetry install --with dev
-      - name: Check formatting
+      - name: Running Validations
         run: |
-          poetry run ruff format --check --diff
-      - name: Check lint
+          poetry run pre-commit run
+      - name: Checking commit messages
         run: |
-          poetry run ruff check
+          poetry run cz check --allow-abort --rev-range HEAD..HEAD

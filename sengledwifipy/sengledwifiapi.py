@@ -101,7 +101,7 @@ class SengledWifiAPI:
     async def get_devices(
         login: SengledLogin,
         entity_ids: list[str] = None,
-    ) -> dict[str, str|int|bool]:
+    ) -> dict[str, str | int | bool]:
         """Retrieve all Sengled Wifi Devices or the specified ones via entity_ids arg.
 
         Args:

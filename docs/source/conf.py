@@ -15,9 +15,9 @@ _toml = tomlkit.loads((_root / "pyproject.toml").read_text(encoding="utf8"))
 
 T = TypeVar("T")
 
+
 def find(key: str, default: Optional[T] = None, as_type: type[T] = str) -> Optional[T]:
-    """
-    Gets a value from pyproject.toml, or a default.
+    """Gets a value from pyproject.toml, or a default.
 
     Original source: https://github.com/dmyersturnbull/tyrannosaurus
     Copyright 2020–2021 Douglas Myers-Turnbull
@@ -38,6 +38,7 @@ def find(key: str, default: Optional[T] = None, as_type: type[T] = str) -> Optio
             return default
     return as_type(at)
 
+
 # -- Project information -----------------------------------------------------
 
 language = "en"
@@ -48,11 +49,7 @@ copyright = f"{project} v{release}"
 
 # -- General configuration ---------------------------------------------------
 
-extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
-    "myst_parser"
-]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "myst_parser"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -82,7 +79,7 @@ html_last_updated_fmt = "%Y-%m-%d"
 # -- Other Options  -------------------------------------------------
 
 # general
-add_module_names = False # whether module names are prepended to all object names
+add_module_names = False  # whether module names are prepended to all object names
 autodoc_member_order = "bysource"
 autodoc_class_signature = "separated"
 

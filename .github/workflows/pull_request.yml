@@ -34,4 +34,4 @@ jobs:
           poetry run pre-commit run
       - name: Checking commit messages to ${{github.head_ref}}
         run: |
-          poetry run cz check --allow-abort --rev-range  ${{github.head_ref}}..HEAD
+          poetry run cz check --allow-abort --rev-range  ${{github.base_ref}}..${{github.head_ref}}

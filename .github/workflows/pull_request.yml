@@ -32,6 +32,6 @@ jobs:
       - name: Running Validations
         run: |
           poetry run pre-commit run
-      - name: Checking commit messages
+      - name: Checking commit messages to ${{github.head_ref}}
         run: |
-          poetry run cz check --allow-abort --rev-range HEAD..HEAD
+          poetry run cz check --allow-abort --rev-range  ${{github.base_ref}}..HEAD

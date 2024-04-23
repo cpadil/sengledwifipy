@@ -1,18 +1,18 @@
 name: On pull request
 
-on: 
+on:
   pull_request:
     types: [opened, reopened, synchronize]
     branches:
       - main
+      - dev
 
 env:
-  DEFAULT_PYTHON: 3.11
+  DEFAULT_PYTHON: 3.12
 
 jobs:
 
   python_checks:
-    if: github.event.pull_request.head.repo.fork
     runs-on: ubuntu-latest
     name: Python Checks
     steps:
@@ -28,10 +28,6 @@ jobs:
       - name: Work dependencies with poetry
         run: |
           poetry install --with dev
-      - name: Check formatting
+      - name: Running Validations
         run: |
-          poetry run ruff format --check --diff 
-      - name: Check lint
-        run: |
-          poetry run ruff check frigate 
-
+          poetry run pre-commit run

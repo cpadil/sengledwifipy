@@ -1,17 +1,15 @@
-"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0"""
+"""Python Package for controlling Sengled Wifi devices. SPDX-License-Identifier: Apache-2.0."""
 
 from __future__ import annotations
+
 import json
 import logging
 import time
-from typing import Any, Optional, TYPE_CHECKING
-from aiohttp import ClientConnectionError, ClientResponse
-import backoff
-from yarl import URL
+from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-    from .sengledwifilogin import SengledLogin
-    from .sengledwifimqtt import SengledWifiMQTT
+import backoff
+from aiohttp import ClientConnectionError, ClientResponse
+from yarl import URL
 
 from .errors import (
     SengledWifipyConnectionError,
@@ -19,6 +17,11 @@ from .errors import (
     SengledWifipyLoginError,
     SengledWifipyTooManyRequestsError,
 )
+
+if TYPE_CHECKING:
+    from .sengledwifilogin import SengledLogin
+    from .sengledwifimqtt import SengledWifiMQTT
+
 
 from .helpers import catch_all_exceptions, hide_email, valid_login_required
 
@@ -54,16 +57,16 @@ class SengledWifiAPI:
         method: str,
         login: SengledLogin,
         uri: str,
-        data: Optional[dict[str, str]] = None,
-        query: Optional[dict[str, str]] = None,
+        data: dict[str, str] = None,
+        query: dict[str, str] = None,
     ) -> ClientResponse:
         """Call an API.
 
         Args:
             login (SengledLogin): needs a valid login
             uri (str): will use the appserver endpoint with this uri
-            data (Optional[dict[str, str]]): payload
-            query (Optional[dict[str, str]]): query parameters
+            data (dict[str, str]): payload
+            query (dict[str, str]): query parameters
 
         Returns:
             None or aiohttp ClientResponse
@@ -95,7 +98,10 @@ class SengledWifiAPI:
 
     @staticmethod
     @catch_all_exceptions
-    async def get_devices(login: SengledLogin, entity_ids: Optional[list[str]] = None) -> Optional[dict[str, Any]]:
+    async def get_devices(
+        login: SengledLogin,
+        entity_ids: list[str] = None,
+    ) -> dict[str, str | int | bool]:
         """Retrieve all Sengled Wifi Devices or the specified ones via entity_ids arg.
 
         Args:
@@ -106,8 +112,13 @@ class SengledWifiAPI:
         Returns:
             Json. Device information.
         """
-
-        response = await SengledWifiAPI._static_request("post", login, "device/list.json", query=None, data={})
+        response = await SengledWifiAPI._static_request(
+            "post",
+            login,
+            "device/list.json",
+            query=None,
+            data={},
+        )
 
         SengledWifiAPI.devices[login.email] = (
             [
@@ -129,9 +140,9 @@ class SengledWifiAPI:
         mqttc: SengledWifiMQTT,
         entity_id: str,
         power_on: bool = None,
-        brightness: Optional[int] = None,
-        color: Optional[str] = None,
-        color_temperature: Optional[int] = None,
+        brightness: int = None,
+        color: str = None,
+        color_temperature: int = None,
     ) -> bool:
         """Set state of a device.
 
@@ -153,18 +164,47 @@ class SengledWifiAPI:
                 sengled_color = sengled_color.replace(*r)
             return sengled_color
 
-        power_on = {"value": ("1" if power_on else "0"), "name": "switch"} if isinstance(power_on, bool) else None
-        brightness = (
-            {"value": str(round((brightness / 255) * 100)), "name": "brightness"} if isinstance(brightness, int) else None
+        power_on = (
+            {
+                "value": ("1" if power_on else "0"),
+                "name": "switch",
+            }
+            if isinstance(power_on, bool)
+            else None
         )
-        color = {"value": convert_color_HA(color), "name": "color"} if isinstance(color, str) else None
+        brightness = (
+            {
+                "value": str(round((brightness / 255) * 100)),
+                "name": "brightness",
+            }
+            if isinstance(brightness, int)
+            else None
+        )
+        color = (
+            {
+                "value": convert_color_HA(color),
+                "name": "color",
+            }
+            if isinstance(color, str)
+            else None
+        )
         color_temperature = (
-            {"value": str(round((color_temperature / 6500) * 100)), "name": "colorTemperature"}
+            {
+                "value": str(round((color_temperature / 6500) * 100)),
+                "name": "colorTemperature",
+            }
             if isinstance(color_temperature, int)
             else None
         )
 
-        color_temp = {"value": "255:45:41", "name": "color"} if isinstance(color_temperature, int) else None
+        color_temp = (
+            {
+                "value": "255:45:41",
+                "name": "color",
+            }
+            if isinstance(color_temperature, int)
+            else None
+        )
 
         timev = str(int(time.time()) - 1577858400)
 

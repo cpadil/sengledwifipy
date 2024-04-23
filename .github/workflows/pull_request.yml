@@ -13,7 +13,6 @@ env:
 jobs:
 
   python_checks:
-    if: github.event.pull_request.head.repo.fork
     runs-on: ubuntu-latest
     name: Python Checks
     steps:
@@ -32,6 +31,3 @@ jobs:
       - name: Running Validations
         run: |
           poetry run pre-commit run
-      - name: Checking commit messages
-        run: |
-          poetry run cz check --allow-abort --rev-range HEAD..HEAD

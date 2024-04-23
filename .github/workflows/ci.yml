@@ -9,13 +9,12 @@ env:
   DEFAULT_PYTHON: 3.11
 
 concurrency:
-  group: build
+  group: buildanddeploy
   cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    concurrency: release
     steps:
     - uses: actions/checkout@main
     - name: Install poetry

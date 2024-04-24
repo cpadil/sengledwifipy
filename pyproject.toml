@@ -26,7 +26,6 @@ certifi = "*"
 backoff = ">=2.2.1"
 aiohttp = "^3.9.4"
 paho-mqtt = "^2.0.0"
-ruff = "^0.3.7"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
@@ -42,6 +41,7 @@ furo = "^2024.1.29"
 pre-commit = "^3.7.0"
 commitizen = "^3.24.0"
 pre-commit-hooks = "^4.6.0"
+ruff = "^0.4.1"
 
 [tool.ruff]
 exclude = [

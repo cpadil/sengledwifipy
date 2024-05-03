@@ -2,23 +2,24 @@
 
 import logging
 import os as oos
-import ssl
 from datetime import datetime
-from json import JSONDecodeError, dumps
+from json import dumps
 from typing import Callable
 from uuid import uuid4
 
-import certifi
 from aiofiles import os
-from aiohttp import ClientSession, ContentTypeError, CookieJar
-from simplejson import JSONDecodeError as SimpleJSONDecodeError
+from aiohttp import ClientResponse, ClientSession, CookieJar
+from yarl import URL
 
 from .const import EXCEPTION_TEMPLATE, HA_DOMAIN, SENGLED_ENDPOINTS, USER_AGENT
-from .errors import SengledWifipyLoginError
+from .errors import (
+    SengledWifipyLoginError,
+)
 from .helpers import (
     catch_all_exceptions,
     hide_email,
     obfuscate,
+    valid_response,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,7 +32,6 @@ class SengledLogin:
         _email (string): Sengled login account
         _password (string): Password for Sengled login account
         _outputpath (function): os.path.join function pointing to the folder to save a session cookie
-        _uuid: (string): Unique 32 char hex to serve as app serial number for registration
         _urls(dict[str, str]): points to the constant SENGLED_ENDPOINTS which is an initial list of Sengled endpoints
         _session (aiohttp.ClientSession): initializes an empty aiohttp.ClientSession to store the cookie information
         _ssl (ssl): used during the authentication
@@ -66,7 +66,6 @@ class SengledLogin:
         self._email: str = email
         self._password: str = password
         self._session: ClientSession = None
-        self._ssl = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
         self._headers: dict[str, str] = {}
         self.status: dict[str, str | bool] = {}
         self.stats: dict[str, str | bool] = {
@@ -76,16 +75,14 @@ class SengledLogin:
         self._outputpath = outputpath if outputpath is not None else (lambda b: oos.path.join("temp", b))
         self._cookiefile: str = self._outputpath(f".storage/{type(self).hass_domain}.{self.email}.pickle")
         self._customer_id: str = None
-        self._uuid = uuid if uuid else uuid4().hex.upper()
         self._data = {
             "user": self._email,
             "pwd": self._password,
-            "uuid": self._uuid,
+            "uuid": uuid if uuid else uuid4().hex.upper(),
             "osType": "android",
             "productCode": "life",
             "appCode": "life",
         }
-
         self._create_session()
 
     @property
@@ -113,15 +110,13 @@ class SengledLogin:
         _LOGGER.debug("SengledWifiApi: LOGIN Creating session")
 
         if not self._session:
-            #  define session headers
             self._headers = {
                 "User-Agent": USER_AGENT,
                 "Accept": "*/*",
                 "Accept-Language": "*",
                 "Content-Type": "application/json",
             }
-            #  initiate session
-            self._session = ClientSession(headers=self._headers)
+            self._session = ClientSession(headers=self._headers, raise_for_status=valid_response)
 
     async def valid_login(self) -> bool:
         """Function that will test the connection is logged in.
@@ -138,29 +133,17 @@ class SengledLogin:
                       \n--last login: {self.stats["login_timestamp"]} \
                       \n--hours: {round((datetime.now() - self.stats["login_timestamp"]).total_seconds()/3600)}h ')
         if (datetime.now() - self.stats["login_timestamp"]).total_seconds() < 86400 and await os.path.exists(self._cookiefile):
-            resp = None
-
             if len(self._session.cookie_jar) == 0:
                 self._session.cookie_jar.load(self._cookiefile)
 
             _LOGGER.debug("SengledWifiApi: LOGIN calling validation api")
-            resp = await self._session.post(
-                self._urls["validSession"],
-                json={},
-                ssl=self._ssl,
-            )
-
-            try:
-                resp = await resp.json()
-            except (JSONDecodeError, SimpleJSONDecodeError, ContentTypeError) as ex:
-                _LOGGER.debug(f"SengledWifiApi: LOGIN Error during login validation: \
-                              \n--{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
+            resp = await self._static_request("post", url=self._urls["validSession"], data={})
+            resp = await resp.json()
 
             if resp and int(resp.get("messageCode")) == 200:
                 _LOGGER.debug("SengledWifiApi: LOGIN login validation with cookie successful")
-                self.stats["api_calls"] += 1
                 return True
-            _LOGGER.debug(f"SengledWifiApi: LOGIN validation api problem: {resp}")
+            _LOGGER.debug(f"SengledWifiApi: LOGIN validation api response not successful: {resp}")
         _LOGGER.debug("SengledWifiApi: LOGIN login not valid, either the login is old >24h or cookie is not valid")
 
         await self.reset()
@@ -182,25 +165,18 @@ class SengledLogin:
 
         _LOGGER.debug("SengledWifiApi: LOGIN Using credentials to login")
 
-        post_resp = await self._session.post(
-            self._urls["login"],
-            json=self._data,
-            headers=self._headers,
-            ssl=self._ssl,
-        )
+        post_resp = await self._static_request("post", url=self._urls["login"], data=self._data)
         post_resp = await post_resp.json()
 
-        if post_resp:
-            if int(post_resp.get("ret")) == 0:
-                _LOGGER.debug(f"SengledWifiApi: LOGIN Login successful for {hide_email(self._email)}; saving cookie")
-                self._customer_id = post_resp.get("customerId")
-                self.status["login_successful"] = True
-                self.stats["login_timestamp"] = datetime.now()
-                self.stats["api_calls"] += 1
-                await self.save_cookiefile()
-                await self._get_server_info()
-                return
-            _LOGGER.debug(f"SengledWifiApi: LOGIN Login not possible for {hide_email(self._email)}")
+        if post_resp and int(post_resp.get("ret")) == 0:
+            _LOGGER.debug(f"SengledWifiApi: LOGIN Login successful for {hide_email(self._email)}; saving cookie")
+            self._customer_id = post_resp.get("customerId")
+            self.status["login_successful"] = True
+            self.stats["login_timestamp"] = datetime.now()
+            await self.save_cookiefile()
+            await self._get_server_info()
+            return
+        _LOGGER.debug(f"SengledWifiApi: LOGIN Login not possible for {hide_email(self._email)}")
 
     async def save_cookiefile(self) -> None:
         """Save login session cookie to file."""
@@ -217,9 +193,9 @@ class SengledLogin:
             raise SengledWifipyLoginError
 
         _LOGGER.debug(f"SengledWifiApi: LOGIN Saved session Cookies: \
-                      \n--{self._print_session_cookies()}")
+                      \n--{await self._print_session_cookies()}")
 
-    def _print_session_cookies(self) -> str:
+    async def _print_session_cookies(self) -> str:
         """Prints the value of the cookies in aiohttp session."""
         result: str = ""
         if not self._session.cookie_jar:
@@ -228,22 +204,42 @@ class SengledLogin:
             result += f"{obfuscate(cookie)}"
         return result
 
+    async def _static_request(
+        self,
+        method: str,
+        url: str,
+        data: dict[str, str] = None,
+        query: dict[str, str] = None,
+    ) -> ClientResponse:
+        """Call an API.
+
+        Args:
+            login (SengledLogin): needs a valid login
+            uri (str): will use the appserver endpoint with this uri
+            data (dict[str, str]): payload
+            query (dict[str, str]): query parameters
+
+        Returns:
+            None or aiohttp ClientResponse
+        """
+        url = URL(url).update_query(query)
+
+        response = await getattr(self._session, method)(url, json=data)
+
+        _LOGGER.debug(f"SengledWifiApi: LOGIN API CALL {hide_email(self._email)}: \
+                      \n--static {response.request_info.method}: {response.request_info.url} \
+                      \n--returned {response.status}:{response.reason}:{response.content_type}")
+
+        self.stats["api_calls"] += 1
+
+        return response
+
     async def _get_server_info(self) -> None:
         """Call to serverDetails endpoint to get Mqtt related endpoints. Called from Login."""
         _LOGGER.debug("SengledWifiApi: LOGIN Getting server endpoints from: %s", self._urls["serverDetails"])
 
-        post_resp = await self._session.post(
-            self._urls["serverDetails"],
-            json={},
-            headers=self._headers,
-            ssl=self._ssl,
-        )
-
-        try:
-            post_resp = await post_resp.json()
-        except (JSONDecodeError, SimpleJSONDecodeError, ContentTypeError) as ex:
-            _LOGGER.debug(f"SengledWifiApi: LOGIN Error during getServerDetails: \
-                          \n--{EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args)}")
+        post_resp = await self._static_request("post", url=self._urls["serverDetails"])
+        post_resp = await post_resp.json()
 
         if int(post_resp.get("messageCode")) == 200:
             self._urls.update(

@@ -24,12 +24,9 @@ class SengledWifiMQTT:
 
     Attributes:
         _login (SengledLogin): SengledLogin object
-        _session (SengledLogin session): SengledLogin session attribute
         _jsession_id (SengledLogin session JSESSIONID): value of cookie JSESSIONID saved in SengledLogin session
-        _headers (dict[str, str]): same headers used in Android app
-        _clientid (str): used during the creation of the mqtt client f"{_jsession_id}@lifeApp"
         mqtt_server (URL): url is obtained during the login and fetched from SengledLogin object
-        mqtt_client (paho.mqtt.client): initialization of paho.mqtt client
+        mqtt_client (paho.mqtt.client): initialization of paho.mqtt client with same headers used in Android app
         _status (bool): to indicate if mqtt connection is active
         devices (list[dict[str, str]]): list of Sengled devices, used to create the topic strings and subscribe, \
             during the initialization is set to None
@@ -60,15 +57,7 @@ class SengledWifiMQTT:
             loop: (asyncio.AbstractEventLoop).
         """
         self._login = login
-        self._session = login.session
-        self._jsession_id = self._session.cookie_jar.filter_cookies("https://sengled.com")["JSESSIONID"].value
-        self._headers = {
-            "Cookie": f"JSESSIONID={self._jsession_id}",
-            "X-Requested-With": "com.sengled.life2",
-        }
-        self._clientid = f"{self._jsession_id}@lifeApp"
-        self.mqtt_server = URL(login.urls["mqtt"])
-        self.mqtt_client: mqtt.Client = None
+        self._jsession_id = self._login.session.cookie_jar.filter_cookies("https://sengled.com")["JSESSIONID"].value
         self._status: bool = False
         self.devices: dict = None
         self.open_callback: Callable[[], Coroutine[Any, Any, None]] = open_callback
@@ -76,15 +65,19 @@ class SengledWifiMQTT:
         self.close_callback: Callable[[], Coroutine[Any, Any, None]] = close_callback
         self.error_callback: Callable[[str], Coroutine[Any, Any, None]] = error_callback
         self._loop: asyncio.AbstractEventLoop = loop if loop else asyncio.get_event_loop()
+        self.mqtt_server = URL(login.urls["mqtt"])
         self.mqtt_client = mqtt.Client(
             callback_api_version=mqttenums.CallbackAPIVersion.VERSION2,
-            client_id=self._clientid,
+            client_id=f"{self._jsession_id}@lifeApp",
             transport="websockets",
         )
         self.mqtt_client.tls_set_context()
         self.mqtt_client.ws_set_options(
             path=self.mqtt_server.path,
-            headers=self._headers,
+            headers={
+                "Cookie": f"JSESSIONID={self._jsession_id}",
+                "X-Requested-With": "com.sengled.life2",
+            },
         )
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.on_connect = self.on_connect

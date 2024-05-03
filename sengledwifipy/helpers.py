@@ -14,6 +14,7 @@ from .errors import (
     SengledWifipyConnectionError,
     SengledWifipyLoginCloseRequested,
     SengledWifipyLoginError,
+    SengledWifipyTooManyRequestsError,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ def catch_all_exceptions(func):  # noqa: D103
             return await func(*args, **kwargs)
         except (ClientConnectionError, KeyError, ServerDisconnectedError) as ex:
             _LOGGER.warning(
-                "%s.%s(%s, %s): A connection error occurred: %s",
+                "SengledWifi %s.%s(%s, %s): A connection error occurred: %s",
                 func.__module__[func.__module__.find(".") + 1 :],
                 func.__name__,
                 obfuscate(args),
@@ -128,19 +129,9 @@ def catch_all_exceptions(func):  # noqa: D103
                 EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args),
             )
             raise SengledWifipyConnectionError from ex
-        except (JSONDecodeError, CookieError) as ex:
+        except (JSONDecodeError, CookieError, ContentTypeError) as ex:
             _LOGGER.warning(
-                "%s.%s(%s, %s): A login error occurred: %s",
-                func.__module__[func.__module__.find(".") + 1 :],
-                func.__name__,
-                obfuscate(args),
-                obfuscate(kwargs),
-                EXCEPTION_TEMPLATE.format(type(ex).__name__, ex.args),
-            )
-            raise SengledWifipyLoginError from ex
-        except ContentTypeError as ex:
-            _LOGGER.warning(
-                "%s.%s(%s, %s): A login error occurred: %s",
+                "SengledWifi %s.%s(%s, %s): A error occurred while calling an api: %s",
                 func.__module__[func.__module__.find(".") + 1 :],
                 func.__name__,
                 obfuscate(args),
@@ -150,7 +141,7 @@ def catch_all_exceptions(func):  # noqa: D103
             raise SengledWifipyLoginError from ex
         except CancelledError as ex:
             _LOGGER.warning(
-                "%s.%s(%s, %s): Timeout error occurred accessing SengledWifiAPI: %s",
+                "SengledWifi %s.%s(%s, %s): Timeout error occurred accessing SengledWifiAPI: %s",
                 func.__module__[func.__module__.find(".") + 1 :],
                 func.__name__,
                 obfuscate(args),
@@ -162,7 +153,7 @@ def catch_all_exceptions(func):  # noqa: D103
             raise
         except Exception as ex:
             _LOGGER.warning(
-                "%s.%s(%s, %s): An error occurred accessing SengledWifiAPI: %s",
+                "SengledWifi %s.%s(%s, %s): An error occurred accessing SengledWifiAPI: %s",
                 func.__module__[func.__module__.find(".") + 1 :],
                 func.__name__,
                 obfuscate(args),
@@ -186,3 +177,19 @@ def valid_login_required(func):  # noqa: D103
         return await func(*args, **kwargs)
 
     return wrapper
+
+
+async def valid_response(response) -> None:
+    """Response validation for aiohttp request.
+
+    Args:
+        response (ClientResponse): response from aiohttp request
+    Returns:
+        None
+    """
+    if response.status == 401:
+        raise SengledWifipyLoginError(response.reason)
+    if response.status == 429:
+        raise SengledWifipyTooManyRequestsError(response.reason)
+    if response.status >= 400:
+        raise SengledWifipyConnectionError(response.reason)

@@ -13,8 +13,6 @@ from yarl import URL
 
 from .errors import (
     SengledWifipyConnectionError,
-    SengledWifipyLoginCloseRequested,
-    SengledWifipyLoginError,
     SengledWifipyTooManyRequestsError,
 )
 
@@ -23,7 +21,11 @@ if TYPE_CHECKING:
     from .sengledwifimqtt import SengledWifiMQTT
 
 
-from .helpers import catch_all_exceptions, hide_email, valid_login_required
+from .helpers import (
+    catch_all_exceptions,
+    hide_email,
+    valid_login_required,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,16 +35,14 @@ class SengledWifiAPI:
 
     Attributes:
         login (SengledLogin):  SengledLogin object
-        session (aiohttp ClientSession): Session attribute of login
     """
 
     devices: dict[str, Any] = {}
     """Class attribute. Saves the devices registered in the related Sengled account."""
 
-    def __init__(self, login: SengledLogin):
+    def __init__(self, login: SengledLogin) -> None:
         """Initialize Sengled Wifi device."""
         self._login = login
-        self._session = login.session
 
     @staticmethod
     @backoff.on_exception(
@@ -71,29 +71,14 @@ class SengledWifiAPI:
         Returns:
             None or aiohttp ClientResponse
         """
-        session = login.session
-        url: URL = URL(login.urls["appserver"] + uri).update_query(query)
+        url = URL(login.urls["appserver"] + uri).update_query(query)
 
-        response = await getattr(session, method)(
-            url,
-            json=data,
-            headers=login._headers,
-            ssl=login._ssl,
-        )
+        response = await getattr(login.session, method)(url, json=data)
 
         _LOGGER.debug(f"SengledWifiApi: API {hide_email(login.email)}: \
                       \n--static {response.request_info.method}: {response.request_info.url} \
                       \n--returned {response.status}:{response.reason}:{response.content_type}")
 
-        login.stats["api_calls"] += 1
-        if response.status == 401:
-            login.status["login_successful"] = False
-            raise SengledWifipyLoginError(response.reason)
-        if response.status == 429:
-            raise SengledWifipyTooManyRequestsError(response.reason)
-        if response.status >= 400:
-            _LOGGER.debug(f"SengledWifiApi: API Returning None due to status: {response.status}")
-            return None
         return response
 
     @staticmethod
@@ -116,8 +101,6 @@ class SengledWifiAPI:
             "post",
             login,
             "device/list.json",
-            query=None,
-            data={},
         )
 
         SengledWifiAPI.devices[login.email] = (

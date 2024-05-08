@@ -2,7 +2,7 @@
 
 [tool.poetry]
 name = "SengledWifiPy"
-version = "0.0.8"
+version = "0.0.9"
 description = "Python package to control Sengled Wifi Devices Programmatically."
 authors = [
   "Cesar <gv4plolxe@mozmail.com>"

@@ -2,6 +2,25 @@
 
 
 
+## v0.0.9 (2024-05-08)
+
+### Chore
+
+* chore: adjusted dependencies ([`a983205`](https://github.com/cpadil/sengledwifipy/commit/a9832055eb0c9ca4a48b6e4306619690faa224c5))
+
+### Ci
+
+* ci: new action to update dev branch after new release ([`d8205d1`](https://github.com/cpadil/sengledwifipy/commit/d8205d1417ced766ccfa528de7f6c93dca67f56e))
+
+### Fix
+
+* fix: adding dependabot configuration ([`8414935`](https://github.com/cpadil/sengledwifipy/commit/84149352cca2935838f35f1a2a9a65c3d381a638))
+
+### Refactor
+
+* refactor: simplified some methods ([`bd12466`](https://github.com/cpadil/sengledwifipy/commit/bd12466fc9a6d2eb1d60611b0ca0376bf542bb97))
+
+
 ## v0.0.8 (2024-04-23)
 
 ### Chore

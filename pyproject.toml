@@ -19,7 +19,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.11, <4"
-aiofiles = "^23.2.1"
+aiofiles = ">=23.2.1,<25.0.0"
 yarl = "*"
 backoff = ">=2.2.1"
 aiohttp = "^3.9.4"

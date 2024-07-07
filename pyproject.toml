@@ -39,7 +39,7 @@ furo = "^2024.1.29"
 pre-commit = "^3.7.0"
 commitizen = "^3.24.0"
 pre-commit-hooks = "^4.6.0"
-ruff = "^0.4.1"
+ruff = ">=0.4.1,<0.6.0"
 
 [tool.ruff]
 exclude = [
